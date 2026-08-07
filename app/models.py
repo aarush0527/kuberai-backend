@@ -2,7 +2,15 @@ import enum
 import uuid
 from datetime import datetime, date
 
-from sqlalchemy import String, DateTime, ForeignKey, Numeric, Date, JSON, Integer, func
+from sqlalchemy import (
+    String,
+    DateTime,
+    ForeignKey,
+    Numeric,
+    Date,
+    Integer,
+    func,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -39,74 +47,110 @@ class SIPFrequency(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: gen_id("user"))
+    id: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+        default=lambda: gen_id("user"),
+    )
+
     display_name: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
 
 
 class Transaction(Base):
-
     __tablename__ = "transactions"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: gen_id("txn"))
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    type: Mapped[str] = mapped_column(String, nullable=False)
-    sip_id: Mapped[str | None] = mapped_column(ForeignKey("sips.id"), nullable=True, index=True)
+    id: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+        default=lambda: gen_id("txn"),
+    )
 
-    # User-stated — validated to <=2dp and rejected (never silently rounded) if violated.
-    rupee_amount: Mapped[float] = mapped_column(Numeric(14, 2, asdecimal=True), nullable=False)
-    # Reference rate at execution time — not capped at 2dp, it's a market quote, not a charge.
-    gold_price_used: Mapped[float] = mapped_column(Numeric(14, 4, asdecimal=True), nullable=False)
-    # System-derived — computed and quantized to 4dp via ROUND_HALF_UP, always.
-    gold_quantity: Mapped[float] = mapped_column(Numeric(14, 4, asdecimal=True), nullable=False)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False,
+        index=True,
+    )
+
+    type: Mapped[str] = mapped_column(String, nullable=False)
+
+    sip_id: Mapped[str | None] = mapped_column(
+        ForeignKey("sips.id"),
+        nullable=True,
+        index=True,
+    )
+
+    rupee_amount: Mapped[float] = mapped_column(
+        Numeric(14, 2, asdecimal=True),
+        nullable=False,
+    )
+
+    gold_price_used: Mapped[float] = mapped_column(
+        Numeric(14, 4, asdecimal=True),
+        nullable=False,
+    )
+
+    gold_quantity: Mapped[float] = mapped_column(
+        Numeric(14, 4, asdecimal=True),
+        nullable=False,
+    )
 
     status: Mapped[str] = mapped_column(String, nullable=False)
-    reason_code: Mapped[str | None] = mapped_column(String, nullable=True)
 
-    # UNIQUE is the real, concurrency-safe guarantee behind "nothing charges twice" —
-    # everything else (dedup lookups) is UX; this constraint is the backstop.
-    idempotency_key: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
-    correlation_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    idempotency_key: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        unique=True,
+        index=True,
+    )
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
 
 
 class SIP(Base):
     __tablename__ = "sips"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: gen_id("sip"))
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    rupee_amount: Mapped[float] = mapped_column(Numeric(14, 2, asdecimal=True), nullable=False)
-    frequency: Mapped[str] = mapped_column(String, nullable=False)
-
-    anchor_day: Mapped[int | None] = mapped_column(Integer, nullable=True)
-
-    next_due_date: Mapped[date] = mapped_column(Date, nullable=False)
-
-    status: Mapped[str] = mapped_column(String, nullable=False, default=SIPStatus.ACTIVE.value)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    id: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+        default=lambda: gen_id("sip"),
     )
 
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False,
+        index=True,
+    )
 
-class PendingClarification(Base):
+    rupee_amount: Mapped[float] = mapped_column(
+        Numeric(14, 2, asdecimal=True),
+        nullable=False,
+    )
 
-    __tablename__ = "pending_clarifications"
+    frequency: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )
 
-    user_id: Mapped[str] = mapped_column(String, primary_key=True)
-    action: Mapped[str] = mapped_column(String, nullable=False)  # sip_pause | sip_resume | sip_cancel
-    candidate_sip_ids: Mapped[list] = mapped_column(JSON, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    next_due_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
 
+    status: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+        default=SIPStatus.ACTIVE.value,
+    )
 
-class Event(Base):
-
-    __tablename__ = "events"
-
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: gen_id("evt"))
-    user_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
-    correlation_id: Mapped[str] = mapped_column(String, nullable=False, index=True)
-    event_type: Mapped[str] = mapped_column(String, nullable=False)
-    payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
