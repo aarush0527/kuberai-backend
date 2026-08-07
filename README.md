@@ -1,8 +1,36 @@
 # KuberAI Backend
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?logo=fastapi)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?logo=sqlalchemy)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
+![Tests](https://img.shields.io/badge/Tests-Pytest-0A9EDC?logo=pytest)
 
 A FastAPI backend for a conversational digital gold platform.
 
 Instead of navigating through menus, users interact with the system using natural language. The application understands investment queries, executes one-time gold purchases, manages recurring SIPs, and maintains a complete transaction and audit history. A hybrid intent engine combines deterministic pattern matching with an LLM so that financial operations remain deterministic while conversations stay natural.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+- [Running Locally](#running-locally)
+- [Running with Docker](#running-with-docker)
+- [Environment Variables](#environment-variables)
+- [API Overview](#api-overview)
+  - [Health](#health)
+  - [Chat](#chat)
+  - [Purchase](#purchase)
+  - [Gold Price](#gold-price)
+  - [SIP](#sip)
+  - [User Journey](#user-journey)
+- [Background Scheduler](#background-scheduler)
+- [Testing](#testing)
+- [Design Principles](#design-principles)
+- [Known Limitations](#known-limitations)
 
 ---
 
