@@ -1,10 +1,4 @@
-"""
-Not shipped in app/ on purpose — this is test infrastructure standing in
-for a real Groq call, not a production capability. Lets the integration
-pipeline (chat_service -> validation -> execution -> reply) be fully
-tested without a live API key, by scripting exactly what a model would
-plausibly return for a given message.
-"""
+
 
 from app.llm.base import LLMClient
 from app.llm.schemas import ProposedAction
