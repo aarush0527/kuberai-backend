@@ -319,7 +319,7 @@ Without one, conversational requests that require an LLM fall back gracefully wh
 Clone the repository.
 
 ```bash
-git clone <repository-url>
+git clone [<repository-url>](https://github.com/aarush0527/kuberai-backend)
 
 cd kuberai-backend
 ```
