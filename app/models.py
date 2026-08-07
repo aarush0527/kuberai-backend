@@ -1,4 +1,3 @@
-import enum
 import uuid
 from datetime import datetime, date
 
@@ -8,7 +7,6 @@ from sqlalchemy import (
     ForeignKey,
     Numeric,
     Date,
-    Integer,
     func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -22,28 +20,6 @@ def gen_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:12]}"
 
 
-class TransactionType(str, enum.Enum):
-    PURCHASE = "purchase"
-    SIP_INSTALLMENT = "sip_installment"
-
-
-class TransactionStatus(str, enum.Enum):
-    COMPLETED = "completed"
-    REJECTED = "rejected"
-
-
-class SIPStatus(str, enum.Enum):
-    ACTIVE = "active"
-    PAUSED = "paused"
-    CANCELLED = "cancelled"
-
-
-class SIPFrequency(str, enum.Enum):
-    DAILY = "daily"
-    WEEKLY = "weekly"
-    MONTHLY = "monthly"
-
-
 class User(Base):
     __tablename__ = "users"
 
@@ -53,7 +29,10 @@ class User(Base):
         default=lambda: gen_id("user"),
     )
 
-    display_name: Mapped[str] = mapped_column(String, nullable=False)
+    display_name: Mapped[str] = mapped_column(
+        String,
+        nullable=False,
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -76,36 +55,19 @@ class Transaction(Base):
         index=True,
     )
 
-    type: Mapped[str] = mapped_column(String, nullable=False)
-
-    sip_id: Mapped[str | None] = mapped_column(
-        ForeignKey("sips.id"),
-        nullable=True,
-        index=True,
-    )
-
-    rupee_amount: Mapped[float] = mapped_column(
-        Numeric(14, 2, asdecimal=True),
-        nullable=False,
-    )
-
-    gold_price_used: Mapped[float] = mapped_column(
-        Numeric(14, 4, asdecimal=True),
+    amount: Mapped[float] = mapped_column(
+        Numeric(12, 2, asdecimal=True),
         nullable=False,
     )
 
     gold_quantity: Mapped[float] = mapped_column(
-        Numeric(14, 4, asdecimal=True),
+        Numeric(12, 4, asdecimal=True),
         nullable=False,
     )
 
-    status: Mapped[str] = mapped_column(String, nullable=False)
-
-    idempotency_key: Mapped[str] = mapped_column(
-        String,
+    gold_price: Mapped[float] = mapped_column(
+        Numeric(12, 4, asdecimal=True),
         nullable=False,
-        unique=True,
-        index=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -129,8 +91,8 @@ class SIP(Base):
         index=True,
     )
 
-    rupee_amount: Mapped[float] = mapped_column(
-        Numeric(14, 2, asdecimal=True),
+    amount: Mapped[float] = mapped_column(
+        Numeric(12, 2, asdecimal=True),
         nullable=False,
     )
 
@@ -142,12 +104,6 @@ class SIP(Base):
     next_due_date: Mapped[date] = mapped_column(
         Date,
         nullable=False,
-    )
-
-    status: Mapped[str] = mapped_column(
-        String,
-        nullable=False,
-        default=SIPStatus.ACTIVE.value,
     )
 
     created_at: Mapped[datetime] = mapped_column(
