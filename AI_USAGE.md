@@ -38,7 +38,7 @@ Examples include:
 * improving project documentation
 * brainstorming edge cases for testing
 
-In every case, generated code was reviewed before being incorporated into the project. The final implementation frequently differed from the initial AI-generated suggestion after adapting it to the project's architecture.
+In every case, generated code was reviewed before being incorporated into the project.
 
 ---
 
